@@ -1,0 +1,149 @@
+package lexer
+
+import (
+	errorhandler "kplang/src/ErrorHandler"
+	"strconv"
+	"strings"
+	"unicode"
+)
+
+const (
+	TOKEN_LET          = "LET"
+	TOKEN_VAR          = "VAR"
+	TOKEN_STRING_VALUE = "STRING_VALUE"
+	TOKEN_NUM_VALUE    = "NUM_VALUE"
+	TOKEN_PRINT        = "PRINT"
+	TOKEN_PRINTLN      = "PRINTLN"
+	TOKEN_STRING       = "STRING"
+	TOKEN_EOF          = "EOF"
+	TOKEN_EOL          = "EOL"
+	TOKEN_EQUALS       = "EQUALS"
+)
+
+type Token struct {
+	Type  string
+	Value interface{}
+}
+
+func Lexer(code string) []Token {
+	tokens := []Token{}
+	i := 0
+	for i < len(code) {
+		if unicode.IsSpace(rune(code[i])) {
+			i++
+			continue
+		}
+		if strings.HasPrefix(code[i:], "println") {
+			tokens = append(tokens, Token{Type: TOKEN_PRINTLN, Value: "println"})
+			i += 7
+
+			for i < len(code) && code[i] == ' ' {
+				i++
+			}
+			if code[i] == '"' {
+				i++
+				start := i
+
+				for i < len(code) && code[i] != '"' {
+					i++
+				}
+				word := code[start:i]
+				tokens = append(tokens, Token{Type: TOKEN_STRING, Value: string(word)})
+				i++
+			} else {
+
+				start := i
+
+				for i < len(code) && code[i] != '\n' {
+					i++
+				}
+				word := code[start:i]
+				word = strings.TrimSpace(word)
+
+				val, err := strconv.Atoi(word)
+				if err != nil {
+					errorhandler.LogError("Syntax Error: print not followed by double quote while printing strings")
+				}
+				if err == nil {
+					tokens = append(tokens, Token{Type: TOKEN_STRING, Value: val})
+				}
+			}
+
+		} else if strings.HasPrefix(code[i:], "print") {
+			tokens = append(tokens, Token{Type: TOKEN_PRINT, Value: "print"})
+			i += 5
+			for i < len(code) && code[i] == ' ' {
+				i++
+			}
+			if code[i] == '"' {
+				i++
+				start := i
+
+				for i < len(code) && code[i] != '"' {
+					i++
+				}
+				word := code[start:i]
+				tokens = append(tokens, Token{Type: TOKEN_STRING, Value: string(word)})
+				i++
+			} else {
+
+				start := i
+
+				for i < len(code) && code[i] != '\n' {
+					i++
+				}
+				word := code[start:i]
+				word = strings.TrimSpace(word)
+
+				val, err := strconv.Atoi(word)
+				if err != nil {
+					errorhandler.LogError("Syntax Error: print not followed by double quote while printing strings")
+				}
+				if err == nil {
+					tokens = append(tokens, Token{Type: TOKEN_STRING, Value: val})
+				}
+			}
+
+		} else if strings.HasPrefix(code[i:], "let") {
+			i = i + 3
+			start := i
+			tokens = append(tokens, Token{Type: TOKEN_LET, Value: "let"})
+			for i < len(code) && code[i] != '=' {
+				i++
+			}
+			word := code[start:i]
+			tokens = append(tokens, Token{Type: TOKEN_VAR, Value: strings.TrimSpace(word)})
+			tokens = append(tokens, Token{Type: TOKEN_EQUALS, Value: "="})
+			i++
+			for i < len(code) && code[i] == ' ' {
+				i++
+			}
+			start = i
+
+			if code[start] == '"' {
+				i++
+				for i < len(code) && code[i] != '"' {
+					i++
+				}
+				word = code[start+1 : i]
+
+				tokens = append(tokens, Token{Type: TOKEN_STRING_VALUE, Value: string(word)})
+				i = i + len(word)
+			} else {
+				for i < len(code) && code[i] != '\n' {
+					i++
+				}
+				word := code[start:i]
+				word = strings.TrimSpace(word)
+				val, err := strconv.Atoi(word)
+				if err == nil {
+					tokens = append(tokens, Token{Type: TOKEN_NUM_VALUE, Value: val})
+				}
+			}
+		} else {
+			i++
+		}
+	}
+	tokens = append(tokens, Token{Type: TOKEN_EOF, Value: ""})
+	return tokens
+}

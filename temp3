@@ -1,0 +1,13 @@
+la length = balen("Hello")
+
+la sp = oli(0, 10)
+
+la val = prachanda("Nepali ho ni"," ",0)
+
+la val2 = deuba("Nepali ho ni","K xa hau","Party Party Party")
+
+la c=10
+
+lekh_arko sp
+lekh_arko val
+lekh_arko val2

@@ -1,0 +1,21 @@
+la count=0
+
+kaam GreetUser(){
+    lekh_arko "Greetings!"
+}
+
+jabasamma count < 3 {
+    GreetUser()
+    la count = count + 1
+}
+
+la b = 20
+la c = b - 5
+
+yedi c == 15 {
+    lekh_arko "Success! c equals 15"
+}
+
+kre? a
+
+lekh_arko a
